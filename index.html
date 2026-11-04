@@ -2,8 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Invoicing App</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#4f46e5" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Invoicing" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
 
   <style>
     :root {
@@ -55,27 +65,12 @@
       color: var(--text);
       transition: opacity 0.6s ease, visibility 0.6s ease;
     }
-    .preloader.is-hidden {
-      opacity: 0;
-      visibility: hidden;
-    }
+    .preloader.is-hidden { opacity: 0; visibility: hidden; }
 
-    /* Logo / spinner */
-    .loader-ring {
-      position: relative;
-      width: 84px;
-      height: 84px;
-    }
+    .loader-ring { position: relative; width: 84px; height: 84px; }
     .loader-ring::before,
-    .loader-ring::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-    }
-    .loader-ring::before {
-      border: 3px solid rgba(255, 255, 255, 0.08);
-    }
+    .loader-ring::after { content: ""; position: absolute; inset: 0; border-radius: 50%; }
+    .loader-ring::before { border: 3px solid rgba(255, 255, 255, 0.08); }
     .loader-ring::after {
       border: 3px solid transparent;
       border-top-color: var(--accent);
@@ -91,21 +86,9 @@
       animation: pulse 1.8s ease-in-out infinite;
     }
 
-    .brand {
-      font-size: 1.1rem;
-      font-weight: 600;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-    }
+    .brand { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; }
+    .status { font-size: 0.9rem; color: var(--muted); min-height: 1.2em; text-align: center; }
 
-    .status {
-      font-size: 0.9rem;
-      color: var(--muted);
-      min-height: 1.2em;
-      text-align: center;
-    }
-
-    /* Progress bar */
     .progress {
       width: min(320px, 80vw);
       height: 4px;
@@ -128,7 +111,6 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* Error state */
     .error-panel {
       display: none;
       flex-direction: column;
@@ -143,21 +125,9 @@
       backdrop-filter: blur(6px);
     }
     .error-panel.is-visible { display: flex; }
-    .error-panel h2 {
-      font-size: 1.05rem;
-      color: var(--danger);
-    }
-    .error-panel p {
-      font-size: 0.875rem;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+    .error-panel h2 { font-size: 1.05rem; color: var(--danger); }
+    .error-panel p { font-size: 0.875rem; color: var(--muted); line-height: 1.5; }
+    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
     .btn {
       appearance: none;
       border: 0;
@@ -172,25 +142,47 @@
       transition: transform 0.15s ease, background 0.2s ease;
     }
     .btn:hover { background: #4338ca; transform: translateY(-1px); }
-    .btn--ghost {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: var(--text);
-    }
+    .btn--ghost { background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text); }
     .btn--ghost:hover { background: rgba(255, 255, 255, 0.06); }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    /* ---------- INSTALL BANNER ---------- */
+    .install-banner {
+      position: fixed;
+      left: 50%;
+      bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+      transform: translate(-50%, 140%);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: min(440px, calc(100vw - 24px));
+      padding: 12px 14px;
+      color: var(--text);
+      background: rgba(17, 28, 53, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(8px);
+      transition: transform 0.4s ease;
     }
+    .install-banner.is-visible { transform: translate(-50%, 0); }
+    .install-banner img { width: 40px; height: 40px; border-radius: 10px; flex: none; }
+    .install-banner__text { flex: 1; font-size: 0.82rem; line-height: 1.35; }
+    .install-banner__text strong { display: block; font-size: 0.92rem; }
+    .install-banner__close {
+      appearance: none; background: transparent; border: 0; color: var(--muted);
+      font-size: 1.3rem; line-height: 1; cursor: pointer; padding: 4px 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes pulse {
       0%, 100% { transform: scale(0.9); opacity: 0.85; }
       50%      { transform: scale(1.05); opacity: 1; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .loader-ring::after,
-      .loader-ring__core { animation: none; }
-      .app-frame, .preloader { transition: none; }
+      .loader-ring::after, .loader-ring__core { animation: none; }
+      .app-frame, .preloader, .install-banner { transition: none; }
     }
   </style>
 </head>
@@ -223,8 +215,8 @@
     <div id="status" class="status">Connecting to server…</div>
 
     <div id="errorPanel" class="error-panel" role="alert">
-      <h2>Taking longer than expected</h2>
-      <p>The application did not respond in time. It may be blocked from embedding, or your connection may be unstable.</p>
+      <h2 id="errorTitle">Taking longer than expected</h2>
+      <p id="errorText">The application did not respond in time. It may be blocked from embedding, or your connection may be unstable.</p>
       <div class="btn-group">
         <button id="retryBtn" class="btn" type="button">Retry</button>
         <a id="openTabBtn" class="btn btn--ghost" target="_blank" rel="noopener noreferrer">Open in new tab</a>
@@ -232,13 +224,25 @@
     </div>
   </div>
 
+  <!-- Install banner -->
+  <div id="installBanner" class="install-banner" role="dialog" aria-label="Install app">
+    <img src="icons/icon-192.png" alt="" />
+    <div class="install-banner__text">
+      <strong>Install Invoicing App</strong>
+      <span id="installHint">Add it to your device for quick access.</span>
+    </div>
+    <button id="installBtn" class="btn" type="button">Install</button>
+    <button id="installClose" class="install-banner__close" type="button" aria-label="Dismiss">&times;</button>
+  </div>
+
   <script>
     (() => {
       const CONFIG = {
         url: "https://script.google.com/macros/s/AKfycbyrsuX9w2hzEYteellV7zoE4-rkJ8Gc28XzaMlSLe3pr82wKgCEA6JXbTF3-qw22LaV/exec",
-        timeoutMs: 20000,   // give up after 20s
-        minDisplayMs: 900,  // keep loader visible at least this long (avoids flicker)
-        maxSimulated: 90    // simulated progress cap until real load completes
+        timeoutMs: 20000,
+        minDisplayMs: 900,
+        maxSimulated: 90,
+        installDismissDays: 14   // hide install prompt this long after dismissal
       };
 
       const iframe      = document.getElementById("appFrame");
@@ -247,6 +251,8 @@
       const progressVal = document.getElementById("progressValue");
       const statusEl    = document.getElementById("status");
       const errorPanel  = document.getElementById("errorPanel");
+      const errorTitle  = document.getElementById("errorTitle");
+      const errorText   = document.getElementById("errorText");
       const retryBtn    = document.getElementById("retryBtn");
       const openTabBtn  = document.getElementById("openTabBtn");
 
@@ -267,7 +273,6 @@
         progress = Math.min(100, Math.max(0, value));
         progressBar.style.width = progress + "%";
         progressVal.textContent = Math.round(progress) + "%";
-
         const msg = [...statusMessages].reverse().find(m => progress >= m.at);
         if (msg) statusEl.textContent = msg.text;
       }
@@ -275,16 +280,20 @@
       function startProgress() {
         clearInterval(progressTimer);
         progressTimer = setInterval(() => {
-          // Ease toward the cap so the bar always appears to move
           const remaining = CONFIG.maxSimulated - progress;
           if (remaining > 0) setProgress(progress + Math.max(0.4, remaining * 0.04));
         }, 180);
       }
 
-      function showError() {
+      function showError(offline = false) {
         if (finished) return;
         clearInterval(progressTimer);
-        statusEl.textContent = "Unable to load application";
+        clearTimeout(timeoutTimer);
+        statusEl.textContent = offline ? "You are offline" : "Unable to load application";
+        errorTitle.textContent = offline ? "No internet connection" : "Taking longer than expected";
+        errorText.textContent = offline
+          ? "The invoicing app needs an internet connection. Reconnect and tap Retry."
+          : "The application did not respond in time. It may be blocked from embedding, or your connection may be unstable.";
         errorPanel.classList.add("is-visible");
         openTabBtn.href = CONFIG.url;
       }
@@ -304,31 +313,103 @@
         clearInterval(progressTimer);
         setProgress(100);
         statusEl.textContent = "Ready";
-
         const elapsed = performance.now() - startTime;
         const wait = Math.max(0, CONFIG.minDisplayMs - elapsed);
         setTimeout(hidePreloader, wait + 250);
+        setTimeout(maybeShowInstall, wait + 2500);
       }
 
       function load() {
+        if (!navigator.onLine) { showError(true); return; }
         finished = false;
         errorPanel.classList.remove("is-visible");
         setProgress(0);
         startProgress();
-
         clearTimeout(timeoutTimer);
-        timeoutTimer = setTimeout(showError, CONFIG.timeoutMs);
-
-        // Reload iframe source (used by Retry)
+        timeoutTimer = setTimeout(() => showError(false), CONFIG.timeoutMs);
         iframe.src = CONFIG.url;
       }
 
       iframe.addEventListener("load", finish);
       retryBtn.addEventListener("click", load);
+      window.addEventListener("online", () => { if (!finished) load(); });
 
       // Initial start
-      startProgress();
-      timeoutTimer = setTimeout(showError, CONFIG.timeoutMs);
+      if (!navigator.onLine) {
+        showError(true);
+      } else {
+        startProgress();
+        timeoutTimer = setTimeout(() => showError(false), CONFIG.timeoutMs);
+      }
+
+      /* ================= PWA ================= */
+
+      // Register service worker (relative path keeps it inside /invoice/)
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("sw.js").catch(err =>
+            console.warn("Service worker registration failed:", err));
+        });
+      }
+
+      const banner     = document.getElementById("installBanner");
+      const installBtn = document.getElementById("installBtn");
+      const closeBtn   = document.getElementById("installClose");
+      const hintEl     = document.getElementById("installHint");
+      const DISMISS_KEY = "invoice-install-dismissed";
+
+      const isStandalone =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone === true;
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+      let deferredPrompt = null;
+
+      function recentlyDismissed() {
+        try {
+          const t = Number(localStorage.getItem(DISMISS_KEY) || 0);
+          return t && (Date.now() - t) < CONFIG.installDismissDays * 864e5;
+        } catch { return false; }
+      }
+      function rememberDismissal() {
+        try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch {}
+      }
+      function hideBanner() { banner.classList.remove("is-visible"); }
+
+      function maybeShowInstall() {
+        if (isStandalone || recentlyDismissed()) return;
+        if (deferredPrompt) {
+          banner.classList.add("is-visible");
+        } else if (isIOS) {
+          // iOS has no install API: show manual instructions
+          hintEl.innerHTML = "Tap <b>Share</b> &rarr; <b>Add to Home Screen</b>.";
+          installBtn.style.display = "none";
+          banner.classList.add("is-visible");
+        }
+      }
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (finished) maybeShowInstall();
+      });
+
+      installBtn.addEventListener("click", async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        hideBanner();
+        if (outcome === "dismissed") rememberDismissal();
+      });
+
+      closeBtn.addEventListener("click", () => { hideBanner(); rememberDismissal(); });
+
+      window.addEventListener("appinstalled", () => {
+        deferredPrompt = null;
+        hideBanner();
+      });
     })();
   </script>
 </body>
